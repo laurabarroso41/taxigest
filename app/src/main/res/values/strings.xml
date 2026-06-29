@@ -1,0 +1,115 @@
+<resources>
+    <string name="app_name">TaxiGest</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_taxis">Taxis</string>
+    <string name="nav_clients">Clientes</string>
+    <string name="nav_trips">Viajes</string>
+    <string name="nav_reports">Reportes</string>
+
+    <!-- Common -->
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
+    <string name="name">Nombre</string>
+    <string name="phone">Teléfono</string>
+    <string name="unknown_route">Ruta desconocida</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">Soluciones de Viaje Inteligente y Reserva de Boletos</string>
+    <string name="home_welcome">¡Bienvenido de nuevo!</string>
+    <string name="hello_user">Hola %1$s!</string>
+    <string name="start_journey">Comienza tu viaje hoy.</string>
+    <string name="which_classic">¿Qué clásico buscas?</string>
+    <string name="cat_all">Todos</string>
+    <string name="cat_ride">Viaje</string>
+    <string name="cat_zido">Zido</string>
+    <string name="cat_hopz">Hopz</string>
+    <string name="book_now">Reservar ahora</string>
+    <string name="price_per_hour">$%1$s/h</string>
+    <string name="rating_format">★ %1$s</string>
+
+    <!-- Taxis Screen -->
+    <string name="taxis_title">Taxis</string>
+    <string name="add_taxi">Agregar Taxi</string>
+    <string name="edit_taxi">Editar Taxi</string>
+    <string name="car_type">Tipo de coche</string>
+    <string name="seats">Asientos</string>
+    <string name="seats_format">%1$s - %2$d asientos</string>
+    <string name="has_ac">Tiene Aire Acondicionado</string>
+    <string name="ac_included">AA Incluido</string>
+
+    <!-- Clients Screen -->
+    <string name="clients_title">Clientes</string>
+    <string name="add_client">Agregar Cliente</string>
+    <string name="edit_client">Editar Cliente</string>
+    <string name="import_contact">Importar Contacto</string>
+    <string name="surnames">Apellidos</string>
+
+    <!-- Trips Screen -->
+    <string name="trips_title">Viajes</string>
+    <string name="add_trip">Nuevo Viaje</string>
+    <string name="taxi_label">Taxi: %1$s</string>
+    <string name="clients_count">Clientes: %1$d</string>
+    <string name="price_format">Precio: $%1$.2f</string>
+    <string name="save_trip">Guardar Viaje</string>
+    <string name="trip_details">Detalles del Viaje</string>
+    <string name="select_taxi">Seleccionar Taxi</string>
+    <string name="date">Fecha</string>
+    <string name="province">Provincia</string>
+    <string name="p_pinar">Pinar del Río</string>
+    <string name="p_artemisa">Artemisa</string>
+    <string name="p_habana">La Habana</string>
+    <string name="p_mayabeque">Mayabeque</string>
+    <string name="p_matanzas">Matanzas</string>
+    <string name="p_vclara">Villa Clara</string>
+    <string name="p_cienfuegos">Cienfuegos</string>
+    <string name="p_sancti">Sancti Spíritus</string>
+    <string name="p_ciego">Ciego de Ávila</string>
+    <string name="p_camaguey">Camagüey</string>
+    <string name="p_las_tunas">Las Tunas</string>
+    <string name="p_holguin">Holguín</string>
+    <string name="p_granma">Granma</string>
+    <string name="p_santiago">Santiago de Cuba</string>
+    <string name="p_guantanamo">Guantánamo</string>
+    <string name="p_isla">Isla de la Juventud</string>
+
+    <string name="total_price">Precio Total</string>
+    <string name="driver_price">Precio Chofer</string>
+    <string name="passengers_count">Cantidad de Pasajeros</string>
+    <string name="trip_type">Tipo de Viaje</string>
+    <string name="one_way">Solo ida</string>
+    <string name="round_trip">Ida y vuelta</string>
+    <string name="has_minors">Hay menores</string>
+    <string name="clients_section">Clientes y Direcciones</string>
+    <string name="select_client">Seleccionar Cliente</string>
+    <string name="pickup_address">Dirección de recogida</string>
+    <string name="destination_address">Dirección de destino</string>
+    <string name="departure_time">Hora de salida</string>
+    <string name="arrival_time">Hora de llegada</string>
+    <string name="add_client_to_trip">Agregar Cliente al Viaje</string>
+    <string name="step_date_time">Selecciona fecha y hora</string>
+    <string name="step_client_location">Detalles de cliente y ubicación</string>
+    <string name="step_vehicle_pricing">Vehículo y precios</string>
+    <string name="times_label">Horarios</string>
+    <string name="pickup_label">Recogida</string>
+    <string name="return_label">Regreso</string>
+    <string name="select_time_title">Seleccionar hora</string>
+    <string name="next_step">Siguiente</string>
+    <string name="back">Atrás</string>
+
+    <!-- Reports Screen -->
+    <string name="reports_title">Reportes de Negocio</string>
+    <string name="report_gains_line">Ganancias por Fecha (Línea)</string>
+    <string name="report_gains_line_desc">El gráfico de líneas mostrará las ganancias a lo largo del tiempo.</string>
+    <string name="report_active_taxis_column">Taxis Activos (Columna)</string>
+    <string name="report_active_taxis_column_desc">El gráfico de columnas mostrará los taxis activos por fecha.</string>
+    <string name="report_gain_by_taxi_bar">Ganancia por Taxi (Barra)</string>
+    <string name="report_gain_by_taxi_bar_desc">Gráfico de barras que muestra la ganancia monetaria por coche.</string>
+    <string name="report_clients_trend_line">Tendencia de Clientes (Línea)</string>
+    <string name="report_clients_trend_line_desc">Gráfico de líneas que muestra las tendencias en el recuento de clientes.</string>
+    <string name="report_passengers_stats">Estadísticas de Pasajeros</string>
+    <string name="report_passengers_stats_desc">Resumen de pasajeros transportados, viajes de ida y vuelta, etc.</string>
+</resources>
