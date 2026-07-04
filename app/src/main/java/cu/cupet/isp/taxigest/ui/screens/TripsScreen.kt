@@ -1,5 +1,14 @@
 package cu.cupet.isp.taxigest.ui.screens
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.telephony.SmsManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,12 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cu.cupet.isp.taxigest.R
@@ -43,6 +55,7 @@ import cu.cupet.isp.taxigest.ui.viewmodel.TripViewModel
 import cu.cupet.isp.taxigest.ui.viewmodel.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.jvm.java
 
 @Composable
 fun TripsScreen() {
@@ -58,11 +71,16 @@ fun TripsScreen() {
     val trips by viewModel.trips.collectAsStateWithLifecycle()
     
     var showDialog by remember { mutableStateOf(false) }
+    var editingTrip by remember { mutableStateOf<TripWithDetails?>(null) }
+    var viewingTrip by remember { mutableStateOf<TripWithDetails?>(null) }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showDialog = true },
+                onClick = { 
+                    editingTrip = null
+                    showDialog = true 
+                },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape,
@@ -88,7 +106,17 @@ fun TripsScreen() {
                 items(trips) { tripWithDetails ->
                     TripItem(
                         tripWithDetails = tripWithDetails,
-                        onDelete = { viewModel.deleteTrip(tripWithDetails.trip) }
+                        onDelete = { viewModel.deleteTrip(tripWithDetails.trip) },
+                        onEdit = {
+                            editingTrip = tripWithDetails
+                            showDialog = true
+                        },
+                        onView = {
+                            viewingTrip = tripWithDetails
+                        },
+                        onSmsSent = {
+                            viewModel.updateTripMessageStatus(tripWithDetails.trip, true)
+                        }
                     )
                 }
             }
@@ -102,6 +130,8 @@ fun TripsScreen() {
         TripWorkflowDialog(
             taxis = taxis,
             clients = clients,
+            allTrips = trips,
+            tripToEdit = editingTrip,
             onDismiss = { showDialog = false },
             onSave = { trip, tripClients ->
                 viewModel.saveTrip(trip, tripClients)
@@ -109,15 +139,41 @@ fun TripsScreen() {
             }
         )
     }
+
+    if (viewingTrip != null) {
+        TripDetailsDialog(
+            tripWithDetails = viewingTrip!!,
+            onDismiss = { viewingTrip = null }
+        )
+    }
 }
 
 @Composable
 fun TripItem(
     tripWithDetails: TripWithDetails,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit,
+    onView: () -> Unit,
+    onSmsSent: () -> Unit
 ) {
+    val context = LocalContext.current
     val dateFormat = SimpleDateFormat("dd MMM, EEE", Locale.getDefault())
-    TaxiGestCard {
+    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    val smsPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                sendSmsToClients(context, tripWithDetails, timeFormat) {
+                    onSmsSent()
+                }
+            } else {
+                Toast.makeText(context, "Permiso de SMS denegado", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
+    TaxiGestCard(modifier = Modifier.clickable { onView() }) {
         Row(
             modifier = Modifier
                 .padding(20.dp)
@@ -157,6 +213,88 @@ fun TripItem(
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // SMS Tag
+                val tagColor = if (tripWithDetails.trip.isClientMessageSent) Color.Gray else Color(0xFF4CAF50)
+                Surface(
+                    onClick = {
+                        val hasPermission = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.SEND_SMS
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                        if (hasPermission) {
+                            sendSmsToClients(context, tripWithDetails, timeFormat) {
+                                onSmsSent()
+                            }
+                        } else {
+                            smsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+                        }
+                    },
+                    color = tagColor.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.wrapContentSize()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.sym_action_email), // SMS Icon placeholder
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = tagColor
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.send_sms_clients),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = tagColor
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // SMS Taxi Tag
+                val taxiSmsColor = Color(0xFFFFB800) // RideYellow
+                Surface(
+                    onClick = {
+                        val hasPermission = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.SEND_SMS
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                        if (hasPermission) {
+                            sendSmsToTaxi(context, tripWithDetails, dateFormat)
+                        } else {
+                            smsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+                        }
+                    },
+                    color = taxiSmsColor.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.wrapContentSize()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.sym_action_email),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = taxiSmsColor
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.send_sms_taxi),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = taxiSmsColor
+                        )
+                    }
+                }
             }
             Column(horizontalAlignment = Alignment.End) {
                 Surface(
@@ -171,12 +309,21 @@ fun TripItem(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.delete),
-                        tint = Color.Red.copy(alpha = 0.6f)
-                    )
+                Row {
+                    IconButton(onClick = onEdit) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(R.string.edit),
+                            tint = Color.Gray
+                        )
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.delete),
+                            tint = Color.Red.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
         }
@@ -188,22 +335,38 @@ fun TripItem(
 fun TripWorkflowDialog(
     taxis: List<Taxi>,
     clients: List<Client>,
+    allTrips: List<TripWithDetails>,
+    tripToEdit: TripWithDetails? = null,
     onDismiss: () -> Unit,
     onSave: (Trip, List<TripClient>) -> Unit
 ) {
     var step by remember { mutableStateOf(1) }
     
     // Trip Data
-    var selectedTaxi by remember { mutableStateOf<Taxi?>(null) }
-    var date by remember { mutableStateOf(System.currentTimeMillis()) }
-    var province by remember { mutableStateOf("") }
-    var totalPrice by remember { mutableStateOf("") }
-    var driverPrice by remember { mutableStateOf("") }
-    var passengersCount by remember { mutableStateOf("1") }
-    var hasMinors by remember { mutableStateOf(false) }
+    var selectedTaxi by remember { mutableStateOf(tripToEdit?.taxi) }
+    var date by remember { mutableStateOf(tripToEdit?.trip?.date ?: System.currentTimeMillis()) }
+    var province by remember { mutableStateOf(tripToEdit?.trip?.province ?: "") }
+    var totalPrice by remember { mutableStateOf(tripToEdit?.trip?.totalPrice?.toString() ?: "") }
+    var driverPrice by remember { mutableStateOf(tripToEdit?.trip?.driverPrice?.toString() ?: "") }
+    var passengersCount by remember { mutableStateOf(tripToEdit?.trip?.passengersCount?.toString() ?: "1") }
+    var hasMinors by remember { mutableStateOf(tripToEdit?.trip?.hasMinors ?: false) }
+    var tripType by remember { mutableIntStateOf(tripToEdit?.trip?.tripType ?: 0) }
 
     // Trip Clients Data
-    val selectedTripClients = remember { mutableStateListOf<TripClientState>() }
+    val selectedTripClients = remember {
+        mutableStateListOf<TripClientState>().apply {
+            tripToEdit?.tripClients?.forEach { tc ->
+                val client = tripToEdit.clients.find { it.id == tc.clientId }
+                add(TripClientState().apply {
+                    this.client = client
+                    this.pickupAddress = tc.pickupAddress
+                    this.destinationAddress = tc.destinationAddress
+                    this.arrivalTime = tc.arrivalTime
+                    this.departureTime = tc.departureTime
+                })
+            }
+        }
+    }
 
     // DatePicker state
     val datePickerState = rememberDatePickerState(
@@ -303,10 +466,38 @@ fun TripWorkflowDialog(
                             )
                             
                             val pCount = passengersCount.toIntOrNull() ?: 0
-                            val filteredTaxis = taxis.filter { it.seatsCount >= pCount }
+                            
+                            // Lógica de disponibilidad del taxi
+                            val calendar = Calendar.getInstance().apply {
+                                timeInMillis = date
+                                set(Calendar.HOUR_OF_DAY, 0)
+                                set(Calendar.MINUTE, 0)
+                                set(Calendar.SECOND, 0)
+                                set(Calendar.MILLISECOND, 0)
+                            }
+                            val startOfDay = calendar.timeInMillis
+                            val endOfDay = startOfDay + (24 * 60 * 60 * 1000) - 1
+                            
+                            val busyTaxiIds = allTrips
+                                .filter { it.trip.date in startOfDay..endOfDay }
+                                .filter { it.trip.id != (tripToEdit?.trip?.id ?: -1L) }
+                                .map { it.trip.taxiId }
+                                .toSet()
+                            
+                            val filteredTaxis = taxis.filter { 
+                                it.seatsCount >= pCount && it.id !in busyTaxiIds 
+                            }
                             
                             TaxiDropdown(filteredTaxis, selectedTaxi) { selectedTaxi = it }
                             
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(selected = tripType == 0, onClick = { tripType = 0 })
+                                Text(stringResource(R.string.one_way))
+                                Spacer(modifier = Modifier.width(16.dp))
+                                RadioButton(selected = tripType == 1, onClick = { tripType = 1 })
+                                Text(stringResource(R.string.round_trip))
+                            }
+
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 OutlinedTextField(
                                     value = totalPrice,
@@ -344,17 +535,20 @@ fun TripWorkflowDialog(
                                 }
                             } else {
                                 val trip = Trip(
+                                    id = tripToEdit?.trip?.id ?: 0L,
                                     taxiId = selectedTaxi?.id ?: 0L,
                                     date = date,
                                     totalPrice = totalPrice.toDoubleOrNull() ?: 0.0,
                                     driverPrice = driverPrice.toDoubleOrNull() ?: 0.0,
                                     province = province,
                                     hasMinors = hasMinors,
-                                    passengersCount = passengersCount.toIntOrNull() ?: 1
+                                    passengersCount = passengersCount.toIntOrNull() ?: 1,
+                                    isClientMessageSent = tripToEdit?.trip?.isClientMessageSent ?: false,
+                                    tripType = tripType
                                 )
                                 val tripClients = selectedTripClients.map { 
                                     TripClient(
-                                        tripId = 0,
+                                        tripId = trip.id,
                                         clientId = it.client?.id ?: 0L,
                                         pickupAddress = it.pickupAddress,
                                         destinationAddress = it.destinationAddress,
@@ -686,3 +880,153 @@ fun formatTime(timestamp: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
     return sdf.format(Date(timestamp))
 }
+
+@Composable
+fun TripDetailsDialog(
+    tripWithDetails: TripWithDetails,
+    onDismiss: () -> Unit
+) {
+    val dateFormat = SimpleDateFormat("dd MMMM yyyy, EEE", Locale.getDefault())
+    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.back))
+            }
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.trip_details),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                DetailRow(stringResource(R.string.date), dateFormat.format(Date(tripWithDetails.trip.date)))
+                DetailRow(stringResource(R.string.province), tripWithDetails.trip.province)
+                DetailRow(stringResource(R.string.select_taxi), tripWithDetails.taxi.name)
+                DetailRow(stringResource(R.string.trip_type), if (tripWithDetails.trip.tripType == 0) stringResource(R.string.one_way) else stringResource(R.string.round_trip))
+                DetailRow(stringResource(R.string.passengers_count), tripWithDetails.trip.passengersCount.toString())
+                DetailRow(stringResource(R.string.total_price), stringResource(R.string.price_format, tripWithDetails.trip.totalPrice))
+                DetailRow(stringResource(R.string.driver_price), stringResource(R.string.price_format, tripWithDetails.trip.driverPrice))
+                DetailRow(stringResource(R.string.has_minors), if (tripWithDetails.trip.hasMinors) "Sí" else "No")
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Text(
+                    text = stringResource(R.string.clients_section),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                tripWithDetails.tripClients.forEach { tc ->
+                    val client = tripWithDetails.clients.find { it.id == tc.clientId }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = "${client?.name} ${client?.surnames}",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(text = "${stringResource(R.string.pickup_address)}: ${tc.pickupAddress}", style = MaterialTheme.typography.bodySmall)
+                        Text(text = "${stringResource(R.string.destination_address)}: ${tc.destinationAddress}", style = MaterialTheme.typography.bodySmall)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = "${stringResource(R.string.departure_time)}: ${timeFormat.format(Date(tc.departureTime))}", style = MaterialTheme.typography.bodySmall)
+                            Text(text = "${stringResource(R.string.arrival_time)}: ${timeFormat.format(Date(tc.arrivalTime))}", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+        },
+        shape = RoundedCornerShape(28.dp)
+    )
+}
+
+@Composable
+fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+private fun sendSmsToTaxi(
+    context: Context,
+    tripWithDetails: TripWithDetails,
+    dateFormat: SimpleDateFormat
+) {
+    val taxiPhone = tripWithDetails.taxi.cellphone
+    if (taxiPhone.isNullOrBlank()) {
+        Toast.makeText(context, "El taxi no tiene número de celular configurado", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val dateStr = dateFormat.format(Date(tripWithDetails.trip.date))
+    val clientsStr = tripWithDetails.clients.joinToString(", ") { "${it.name} ${it.surnames}" }
+    val message = context.getString(
+        R.string.sms_taxi_template,
+        tripWithDetails.trip.province,
+        dateStr,
+        clientsStr
+    )
+
+    try {
+        val smsManager: SmsManager = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            context.getSystemService(SmsManager::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            SmsManager.getDefault()
+        }
+
+        smsManager.sendTextMessage(taxiPhone, null, message, null, null)
+        Toast.makeText(context, "Información enviada al taxi", Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        Toast.makeText(context, "Error al enviar SMS al taxi: ${e.message}", Toast.LENGTH_LONG).show()
+    }
+}
+
+private fun sendSmsToClients(
+    context: Context,
+    tripWithDetails: TripWithDetails,
+    timeFormat: SimpleDateFormat,
+    onSuccess: () -> Unit
+) {
+    val earliestTime = tripWithDetails.tripClients.minOfOrNull { it.departureTime }
+        ?: tripWithDetails.trip.date
+    val timeStr = timeFormat.format(Date(earliestTime))
+    val message = context.getString(R.string.sms_reminder_template, timeStr)
+
+    try {
+        val smsManager: SmsManager = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            context.getSystemService(SmsManager::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            SmsManager.getDefault()
+        }
+
+        tripWithDetails.clients.forEach { client ->
+            if (client.phone.isNotBlank()) {
+                smsManager.sendTextMessage(client.phone, null, message, null, null)
+            }
+        }
+        Toast.makeText(context, "Mensajes enviados con éxito", Toast.LENGTH_SHORT).show()
+        onSuccess()
+    } catch (e: Exception) {
+        Toast.makeText(context, "Error al enviar SMS: ${e.message}", Toast.LENGTH_LONG).show()
+    }
+}
+

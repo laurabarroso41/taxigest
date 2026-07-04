@@ -99,6 +99,12 @@
     <string name="select_time_title">Seleccionar hora</string>
     <string name="next_step">Siguiente</string>
     <string name="back">Atrás</string>
+    <string name="send_sms_clients">Enviar SMS a clientes</string>
+    <string name="sms_reminder_template">Recordatorio: Viaje programado para las %1$s.</string>
+    <string name="cellphone">Celular</string>
+    <string name="fix_phone">Teléfono fijo</string>
+    <string name="send_sms_taxi">Enviar info al taxi</string>
+    <string name="sms_taxi_template">Viaje a %1$s, Fecha: %2$s. Clientes: %3$s.</string>
 
     <!-- Reports Screen -->
     <string name="reports_title">Reportes de Negocio</string>

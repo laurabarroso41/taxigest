@@ -48,4 +48,17 @@ class TripViewModel(
             tripDao.deleteTripClientsByTripId(trip.id)
         }
     }
+
+    fun updateTripMessageStatus(trip: Trip, sent: Boolean) {
+        viewModelScope.launch {
+            tripDao.updateTrip(trip.copy(isClientMessageSent = sent))
+        }
+    }
+
+    fun getGainsReport(startDate: Long, endDate: Long): Flow<Double?> = tripDao.getGainsReport(startDate, endDate)
+    fun getTripsByDateReport(startDate: Long, endDate: Long): Flow<List<TripDao.DateCount>> = tripDao.getTripsByDateReport(startDate, endDate)
+    fun getGainByTaxiReport(startDate: Long, endDate: Long): Flow<List<TripDao.TaxiGain>> = tripDao.getGainByTaxiReport(startDate, endDate)
+    fun getClientsCountReport(startDate: Long, endDate: Long): Flow<List<TripDao.DateCount>> = tripDao.getClientsCountReport(startDate, endDate)
+    fun getPassengersByTripTypeReport(startDate: Long, endDate: Long): Flow<List<TripDao.TripTypeCount>> = tripDao.getPassengersByTripTypeReport(startDate, endDate)
+    fun getTripsWithDetailsByDate(startDate: Long, endDate: Long): Flow<List<TripWithDetails>> = tripDao.getTripsWithDetailsByDate(startDate, endDate)
 }

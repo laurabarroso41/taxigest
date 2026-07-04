@@ -1,5 +1,6 @@
 package cu.cupet.isp.taxigest.data.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -12,5 +13,7 @@ data class Trip(
     val driverPrice: Double,
     val province: String,
     val hasMinors: Boolean,
-    val passengersCount: Int
+    val passengersCount: Int,
+    val isClientMessageSent: Boolean = false,
+    val tripType: Int = 0 // 0: One way, 1: Round trip
 )

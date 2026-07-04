@@ -9,5 +9,7 @@ data class Taxi(
     val name: String,
     val seatsCount: Int,
     val carType: String,
-    val hasAirConditioning: Boolean
+    val hasAirConditioning: Boolean,
+    val cellphone: String?,
+    val fixPhone:String?
 )

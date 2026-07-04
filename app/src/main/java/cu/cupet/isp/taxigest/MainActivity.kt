@@ -56,7 +56,7 @@ fun TaxiGestApp() {
             onBack = { backStack.removeLastOrNull() },
             entryProvider = { key ->
                 when (key) {
-                    is Screen.Home -> NavEntry(key) { HomeScreen() }
+                    is Screen.Home -> NavEntry(key) { HomeScreen(onNavigateToDailyTrips = { date -> backStack.add(Screen.DailyTrips(date)) }) }
                     is Screen.Taxis -> NavEntry(key) { TaxisScreen() }
                     is Screen.Clients -> NavEntry(key) { 
                         ClientsScreen(onImportContacts = { backStack.add(Screen.ImportContacts) }) 
@@ -64,6 +64,7 @@ fun TaxiGestApp() {
                     is Screen.Trips -> NavEntry(key) { TripsScreen() }
                     is Screen.Reports -> NavEntry(key) { ReportsScreen() }
                     is Screen.ImportContacts -> NavEntry(key) { ImportContactsScreen(onBack = { backStack.removeLastOrNull() }) }
+                    is Screen.DailyTrips -> NavEntry(key) { DailyTripsScreen(date = key.date, onBack = { backStack.removeLastOrNull() }) }
                     else -> NavEntry(Unit) { Text(stringResource(R.string.unknown_route)) }
                 }
             }

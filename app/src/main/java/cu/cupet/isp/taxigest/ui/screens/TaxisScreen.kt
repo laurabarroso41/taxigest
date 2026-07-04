@@ -113,6 +113,9 @@ fun TaxiItem(
                     text = stringResource(R.string.seats_format, taxi.carType, taxi.seatsCount),
                     style = MaterialTheme.typography.bodyMedium
                 )
+                if (!taxi.cellphone.isNullOrBlank()) {
+                    Text(text = "${stringResource(R.string.cellphone)}: ${taxi.cellphone}", style = MaterialTheme.typography.bodySmall)
+                }
                 if (taxi.hasAirConditioning) {
                     Text(
                         text = stringResource(R.string.ac_included),
@@ -143,6 +146,8 @@ fun TaxiDialog(
     var seats by remember { mutableStateOf(taxi?.seatsCount?.toString() ?: "4") }
     var carType by remember { mutableStateOf(taxi?.carType ?: "") }
     var hasAC by remember { mutableStateOf(taxi?.hasAirConditioning ?: false) }
+    var cellphone by remember { mutableStateOf(taxi?.cellphone ?: "") }
+    var fixPhone by remember { mutableStateOf(taxi?.fixPhone ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -153,6 +158,18 @@ fun TaxiDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.name)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = cellphone,
+                    onValueChange = { cellphone = it },
+                    label = { Text(stringResource(R.string.cellphone)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = fixPhone,
+                    onValueChange = { fixPhone = it },
+                    label = { Text(stringResource(R.string.fix_phone)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
@@ -183,7 +200,9 @@ fun TaxiDialog(
                             name = name,
                             seatsCount = seats.toIntOrNull() ?: 4,
                             carType = carType,
-                            hasAirConditioning = hasAC
+                            hasAirConditioning = hasAC,
+                            cellphone = cellphone,
+                            fixPhone = fixPhone
                         )
                     )
                 },
