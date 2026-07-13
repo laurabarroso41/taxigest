@@ -106,16 +106,22 @@
     <string name="send_sms_taxi">Enviar info al taxi</string>
     <string name="sms_taxi_template">Viaje a %1$s, Fecha: %2$s. Clientes: %3$s.</string>
 
+    <!-- Login Screen -->
+    <string name="login_welcome">Bienvenido a TaxiGest</string>
+    <string name="login_subtitle">Inicia sesión para continuar</string>
+    <string name="username">Usuario</string>
+    <string name="password">Contraseña</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="login_error">Usuario o contraseña incorrectos</string>
+
     <!-- Reports Screen -->
     <string name="reports_title">Reportes de Negocio</string>
-    <string name="report_gains_line">Ganancias por Fecha (Línea)</string>
-    <string name="report_gains_line_desc">El gráfico de líneas mostrará las ganancias a lo largo del tiempo.</string>
-    <string name="report_active_taxis_column">Taxis Activos (Columna)</string>
-    <string name="report_active_taxis_column_desc">El gráfico de columnas mostrará los taxis activos por fecha.</string>
-    <string name="report_gain_by_taxi_bar">Ganancia por Taxi (Barra)</string>
-    <string name="report_gain_by_taxi_bar_desc">Gráfico de barras que muestra la ganancia monetaria por coche.</string>
-    <string name="report_clients_trend_line">Tendencia de Clientes (Línea)</string>
-    <string name="report_clients_trend_line_desc">Gráfico de líneas que muestra las tendencias en el recuento de clientes.</string>
-    <string name="report_passengers_stats">Estadísticas de Pasajeros</string>
-    <string name="report_passengers_stats_desc">Resumen de pasajeros transportados, viajes de ida y vuelta, etc.</string>
+    <string name="report_gains_by_date">Ganancias por rango de fecha</string>
+    <string name="report_active_taxis">Reporte de carros trabajando</string>
+    <string name="report_gain_by_taxi">Ganancia monetaria por carro</string>
+    <string name="report_client_count">Cantidad de clientes</string>
+    <string name="report_total_gains">Ganancia monetaria total</string>
+    <string name="report_passenger_count">Cantidad de pasajeros</string>
+    <string name="logout">Cerrar Sesión</string>
+    <string name="menu">Menú</string>
 </resources>

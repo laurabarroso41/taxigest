@@ -60,11 +60,15 @@ interface TripDao {
     @Query("SELECT tripType, SUM(passengersCount) as count FROM trips WHERE date BETWEEN :startDate AND :endDate GROUP BY tripType")
     fun getPassengersByTripTypeReport(startDate: Long, endDate: Long): Flow<List<TripTypeCount>>
 
+    @Query("SELECT date, SUM(totalPrice - driverPrice) as gain FROM trips WHERE date BETWEEN :startDate AND :endDate GROUP BY date")
+    fun getDailyGainsReport(startDate: Long, endDate: Long): Flow<List<DailyGain>>
+
     @Transaction
     @Query("SELECT * FROM trips WHERE date BETWEEN :startDate AND :endDate")
     fun getTripsWithDetailsByDate(startDate: Long, endDate: Long): Flow<List<TripWithDetails>>
 
     data class DateCount(val date: Long, val count: Int)
+    data class DailyGain(val date: Long, val gain: Double)
     data class TaxiGain(val taxiId: Long, val gain: Double)
     data class TripTypeCount(val tripType: Int, val count: Int)
 }

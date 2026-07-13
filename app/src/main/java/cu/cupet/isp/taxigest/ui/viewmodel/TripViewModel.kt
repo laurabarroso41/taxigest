@@ -61,4 +61,5 @@ class TripViewModel(
     fun getClientsCountReport(startDate: Long, endDate: Long): Flow<List<TripDao.DateCount>> = tripDao.getClientsCountReport(startDate, endDate)
     fun getPassengersByTripTypeReport(startDate: Long, endDate: Long): Flow<List<TripDao.TripTypeCount>> = tripDao.getPassengersByTripTypeReport(startDate, endDate)
     fun getTripsWithDetailsByDate(startDate: Long, endDate: Long): Flow<List<TripWithDetails>> = tripDao.getTripsWithDetailsByDate(startDate, endDate)
+    fun getDailyGainsReport(startDate: Long, endDate: Long): Flow<List<TripDao.DailyGain>> = tripDao.getDailyGainsReport(startDate, endDate)
 }

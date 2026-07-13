@@ -39,8 +39,10 @@ import cu.cupet.isp.taxigest.ui.viewmodel.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
+import androidx.compose.material.icons.filled.Menu
+
 @Composable
-fun HomeScreen(onNavigateToDailyTrips: (Long) -> Unit) {
+fun HomeScreen(userName: String, onNavigateToDailyTrips: (Long) -> Unit, onOpenMenu: () -> Unit) {
     val context = LocalContext.current
     val database = remember { TaxiGestDatabase.getDatabase(context) }
     val viewModel: TripViewModel = viewModel(
@@ -80,16 +82,20 @@ fun HomeScreen(onNavigateToDailyTrips: (Long) -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onOpenMenu) {
+                    Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.menu))
+                }
+                Spacer(modifier = Modifier.width(4.dp))
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.LightGray)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = stringResource(R.string.hello_user, "Martin"),
+                        text = stringResource(R.string.hello_user, userName),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )

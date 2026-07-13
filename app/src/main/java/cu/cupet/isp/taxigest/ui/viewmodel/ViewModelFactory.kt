@@ -5,11 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import cu.cupet.isp.taxigest.data.dao.ClientDao
 import cu.cupet.isp.taxigest.data.dao.TaxiDao
 import cu.cupet.isp.taxigest.data.dao.TripDao
+import cu.cupet.isp.taxigest.data.dao.UserDao
+import cu.cupet.isp.taxigest.ui.viewmodel.UserViewModel
 
 class ViewModelFactory(
     private val taxiDao: TaxiDao? = null,
     private val clientDao: ClientDao? = null,
-    private val tripDao: TripDao? = null
+    private val tripDao: TripDao? = null,
+    private val userDao: UserDao? = null
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TaxiViewModel::class.java)) {
@@ -23,6 +26,10 @@ class ViewModelFactory(
         if (modelClass.isAssignableFrom(TripViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return TripViewModel(tripDao!!, taxiDao!!, clientDao!!) as T
+        }
+        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return UserViewModel(userDao!!) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

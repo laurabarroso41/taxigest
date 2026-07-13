@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cu.cupet.isp.taxigest.R
@@ -37,40 +38,53 @@ fun ReportsScreen() {
     ) {
         SectionHeader(title = stringResource(R.string.reports_title))
         
-        ReportCard(title = stringResource(R.string.report_gains_line)) {
-            Text(stringResource(R.string.report_gains_line_desc))
+        ReportCategoryItem(title = stringResource(R.string.report_gains_by_date)) {
+            // Placeholder for Date Range Earning Report
+            Text("Ver ganancias por rango de fechas")
         }
 
-        ReportCard(title = stringResource(R.string.report_active_taxis_column)) {
-            Text(stringResource(R.string.report_active_taxis_column_desc))
+        ReportCategoryItem(title = stringResource(R.string.report_active_taxis)) {
+            // Placeholder for Active Taxis Report
+            Text("Listado de carros trabajando")
         }
         
-        ReportCard(title = stringResource(R.string.report_gain_by_taxi_bar)) {
-            Text(stringResource(R.string.report_gain_by_taxi_bar_desc))
+        ReportCategoryItem(title = stringResource(R.string.report_gain_by_taxi)) {
+            // Placeholder for Earning by Taxi Report
+            Text("Ganancia generada por cada coche")
         }
 
-        ReportCard(title = stringResource(R.string.report_clients_trend_line)) {
-            Text(stringResource(R.string.report_clients_trend_line_desc))
+        ReportCategoryItem(title = stringResource(R.string.report_client_count)) {
+            // Placeholder for Client Count Report
+            Text("Total de clientes registrados")
         }
 
-        ReportCard(title = stringResource(R.string.report_passengers_stats)) {
-            Text(stringResource(R.string.report_passengers_stats_desc))
+        ReportCategoryItem(title = stringResource(R.string.report_total_gains)) {
+            // Placeholder for Total Gains Report
+            Text("Suma total de todas las ganancias")
+        }
+
+        ReportCategoryItem(title = stringResource(R.string.report_passenger_count)) {
+            // Placeholder for Passenger Count Report
+            Text("Total de pasajeros transportados")
         }
     }
 }
 
 @Composable
-fun ReportCard(
+fun ReportCategoryItem(
     title: String,
     content: @Composable () -> Unit
 ) {
-    TaxiGestCard(modifier = Modifier.padding(bottom = 16.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(modifier = Modifier.height(100.dp)) {
-                content()
-            }
+    TaxiGestCard(modifier = Modifier.padding(bottom = 12.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = title, 
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            content()
         }
     }
 }

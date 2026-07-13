@@ -10,4 +10,5 @@ sealed interface Screen {
     @Serializable data object Reports : Screen
     @Serializable data object ImportContacts : Screen
     @Serializable data class DailyTrips(val date: Long) : Screen
+    @Serializable data class ReportDetail(val type: String) : Screen
 }

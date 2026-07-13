@@ -109,7 +109,7 @@ fun SectionHeader(
         text = title,
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.ExtraBold,
-        modifier = modifier.padding(vertical = 12.dp),
+        modifier = modifier.padding(vertical = 10.dp),
         color = MaterialTheme.colorScheme.onBackground
     )
 }
